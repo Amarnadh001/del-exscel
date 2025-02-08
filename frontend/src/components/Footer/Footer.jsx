@@ -7,8 +7,8 @@ const Footer = () => {
         <div className='footer' id='footer'>
             <div className="footer-content">
                 <div className="footer-content-left">
-                    <img src={assets.logo} alt="" />
-                    <p>Lorem Ipsum is simply dummy text of the printing and typetesting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a gallery of type and scrambled it to make a type specimen book.</p>
+                    <img className='logo' src="https://yt3.ggpht.com/-VMlDBPP33Yw/AAAAAAAAAAI/AAAAAAAAAAA/N8i9Hxk-Ljs/s900-c-k-no-mo-rj-c0xffffff/photo.jpg" alt="" />
+                    <p>Food Fusion is a combination of wide variety of food items in a single site. This site is implemented in such a way that the needs of the user is being fulfilled by placing the order without any challenges. This food fusion was implemented in the year 2024.</p>
                     <div className="footer-social-icons">
                         <img src={assets.facebook_icon} alt="" />
                         <img src={assets.twitter_icon} alt="" />
