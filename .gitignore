@@ -24,8 +24,8 @@ dist-ssr
 *.sw?
 
 #mannual changes
-fronntend/node_modules
+frontend/node_modules
 backend/node_modules
 .env
-.fronntend/.env
+.frontend/.env
 .backend/.env
