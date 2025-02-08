@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#mannual changes
+fronntend/node_modules
+backend/node_modules
+.env
+.fronntend/.env
+.backend/.env
