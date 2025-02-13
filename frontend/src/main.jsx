@@ -1,16 +1,23 @@
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App.jsx'
-import './index.css'
-import StoreContextProvider from './context/StoreContext.jsx'
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App.jsx';
+import './index.css';
+import StoreContextProvider from './context/StoreContext.jsx';
+import { GoogleOAuthProvider } from '@react-oauth/google'; // Import GoogleOAuthProvider
 
-createRoot(document.getElementById('root')).render(
+// Replace this with your actual Google OAuth client ID
+const googleClientId = 'YOUR_GOOGLE_OAUTH_CLIENT_ID';
+
+// Create the root for React to render into
+const root = createRoot(document.getElementById('root'));
+
+// Render the app with BrowserRouter, StoreContextProvider, and GoogleOAuthProvider
+root.render(
   <BrowserRouter>
-    <StoreContextProvider>
-      <App />
-    </StoreContextProvider>
-
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <StoreContextProvider>
+        <App />
+      </StoreContextProvider>
+    </GoogleOAuthProvider>
   </BrowserRouter>
-
-
-)
+);

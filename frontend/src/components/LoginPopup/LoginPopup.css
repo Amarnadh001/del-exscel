@@ -6,9 +6,10 @@
     background-color: #00000090;
     display: grid;
 }
+
 .login-popup-container {
     place-self: center;
-    width: max(23vw,330px);
+    width: max(23vw, 330px);
     color: #808080;
     background-color: white;
     display: flex;
@@ -19,27 +20,32 @@
     font-size: 14px;
     animation: fadeIn 0.5s;
 }
+
 .login-popup-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: black;
 }
-.login-popup-title img{
+
+.login-popup-title img {
     width: 16px;
     cursor: pointer;
 }
+
 .login-popup-inputs {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+
 .login-popup-inputs input {
     outline: none;
     border: 1px solid #c9c9c9;
     padding: 10px;
     border-radius: 4px;
 }
+
 .login-popup-container button {
     border: none;
     padding: 10px;
@@ -49,17 +55,64 @@
     font-size: 15px;
     cursor: pointer;
 }
+
 .login-popup-condition {
     display: flex;
     align-items: start;
     gap: 8px;
     margin-top: -15px;
 }
+
 .login-popup-condition input {
     margin-top: 5px;
 }
+
 .login-popup p span {
     color: tomato;
     font-weight: 500;
     cursor: pointer;
+}
+
+.google-sign-in {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.google-sign-in button {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 250px;
+    /* Default width */
+    max-width: 100%;
+    /* Ensure it doesn't overflow the container */
+}
+
+.google-sign-in button:hover {
+    background-color: #357ae8;
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+    .google-sign-in button {
+        width: 200px;
+        /* Adjust width for tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    .google-sign-in button {
+        width: 180px;
+        /* Adjust width for small screens */
+        padding: 8px 16px;
+        /* Reduce padding for smaller screens */
+        font-size: 14px;
+        /* Slightly smaller font */
+    }
 }
