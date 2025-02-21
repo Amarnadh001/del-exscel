@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 
 const router = express.Router();
@@ -14,6 +15,16 @@ const transporter = nodemailer.createTransport({
         pass: "gawcvlvnhhirnhkm",
     },
 });
+
+// Clean up expired OTPs every minute
+setInterval(() => {
+    const now = Date.now();
+    for (const email in otpStorage) {
+        if (otpStorage[email].expiresAt < now) {
+            delete otpStorage[email];
+        }
+    }
+}, 60 * 1000);
 
 // Send OTP to email
 router.post("/send-otp", async (req, res) => {
@@ -49,22 +60,32 @@ router.post("/send-otp", async (req, res) => {
             text: `Your OTP is: ${otp}. It will expire in 5 minutes.`,
         });
 
+        console.log("Sending OTP Payload:", {
+            name: req.body.name,
+            email: req.body.email,
+            phone: req.body.phone,
+        });
+
         res.json({
             success: true,
             message: "OTP sent successfully",
         });
     } catch (error) {
         console.error("OTP send error:", error);
+
+        // Handle email sending errors
+        if (error.code === "EAUTH" || error.code === "EENVELOPE") {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to send OTP. Please check your email configuration.",
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: "Failed to send OTP. Please try again.",
         });
     }
-    console.log("Sending OTP Payload:", {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-      });
 });
 
 // Verify OTP
@@ -116,6 +137,8 @@ router.post("/verify-otp", (req, res) => {
 
 // Complete registration
 router.post("/register", async (req, res) => {
+    console.log("Incoming Registration Request:", req.body);
+
     const { name, email, password, phone } = req.body;
 
     // Validate required fields
@@ -182,13 +205,15 @@ router.post("/register", async (req, res) => {
             message: "Registration failed. Please try again.",
         });
     }
-    console.log("Incoming Registration Request:", req.body);
 });
 
-// Helper function for JWT generation (add to your auth.js middleware)
+// Helper function for JWT generation
 const generateToken = (user) => {
-    // Implement your JWT signing logic here
-    return "your.jwt.token";
+    return jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET, // Use a secret key from environment variables
+        { expiresIn: "1h" } // Token expires in 1 hour
+    );
 };
 
 export default router;

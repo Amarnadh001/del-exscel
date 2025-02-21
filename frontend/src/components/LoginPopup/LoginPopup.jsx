@@ -18,6 +18,7 @@ const LoginPopup = ({ setShowLogin }) => {
         password: "",
         otp: "",
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const onChangeHandler = (event) => {
         const { name, value } = event.target;
@@ -25,19 +26,25 @@ const LoginPopup = ({ setShowLogin }) => {
     };
 
     const sendOtp = async () => {
+        if (isLoading) return;
+        setIsLoading(true);
+
         // Validate input fields
         if (!data.name?.trim()) {
             alert("❌ Please enter your full name.");
+            setIsLoading(false);
             return;
         }
 
         if (!data.email || !data.email.includes("@")) {
             alert("❌ Please enter a valid email address.");
+            setIsLoading(false);
             return;
         }
 
-        if (!data.phone?.trim()) {
-            alert("❌ Phone number is required.");
+        if (!/^\d{10}$/.test(data.phone.replace(/\D/g, ""))) {
+            alert("❌ Please enter a valid 10-digit phone number.");
+            setIsLoading(false);
             return;
         }
 
@@ -61,22 +68,27 @@ const LoginPopup = ({ setShowLogin }) => {
         } catch (error) {
             console.error("OTP error:", error.response?.data);
             alert(
-                `❌ Failed to send OTP: ${error.response?.data?.message || "Please check your details"
-                }`
+                `❌ Failed to send OTP: ${error.response?.data?.message || "Please check your details"}`
             );
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const verifyOtp = async () => {
+        if (isLoading) return;
+        setIsLoading(true);
+
         if (!data.otp || data.otp.length !== 6) {
             alert("❌ Please enter a 6-digit OTP.");
+            setIsLoading(false);
             return;
         }
 
         try {
             const response = await axios.post(`${url}/api/auth/verify-otp`, {
                 email: data.email,
-                otp: data.otp
+                otp: data.otp,
             });
 
             if (response.data.success) {
@@ -85,19 +97,28 @@ const LoginPopup = ({ setShowLogin }) => {
                 alert("❌ OTP verification failed");
             }
         } catch (error) {
-            console.error("OTP verify error:", error.response?.data);
-            alert("❌ OTP verification failed: " + (error.response?.data?.message || "Server error"));
+            console.error("OTP verify error:", error);
+            alert(
+                `❌ OTP verification failed: ${error.response?.data?.message || "Server error"}`
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const createPassword = async () => {
+        if (isLoading) return;
+        setIsLoading(true);
+
         if (!data.name?.trim()) {
             alert("❌ Please enter your full name.");
+            setIsLoading(false);
             return;
         }
 
         if (!data.password || data.password.length < 6) {
             alert("❌ Password must be at least 6 characters.");
+            setIsLoading(false);
             return;
         }
 
@@ -128,18 +149,22 @@ const LoginPopup = ({ setShowLogin }) => {
         } catch (error) {
             console.error("Registration error:", error.response?.data);
             alert(
-                `❌ Registration failed: ${error.response?.data?.message || "Please check your details"
-                }`
+                `❌ Registration failed: ${error.response?.data?.message || "Please check your details"}`
             );
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleLogin = async (event) => {
         event.preventDefault();
+        if (isLoading) return;
+        setIsLoading(true);
+
         try {
             const response = await axios.post(`${url}/api/user/login`, {
                 email: data.email,
-                password: data.password
+                password: data.password,
             });
 
             if (response.data.success) {
@@ -151,6 +176,8 @@ const LoginPopup = ({ setShowLogin }) => {
         } catch (error) {
             console.error("Login error:", error.response?.data);
             alert("❌ Login failed: " + (error.response?.data?.message || "Invalid credentials"));
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -173,7 +200,9 @@ const LoginPopup = ({ setShowLogin }) => {
                                     type="email" placeholder="Email" required />
                                 <input name="phone" onChange={onChangeHandler} value={data.phone}
                                     type="tel" placeholder="Phone Number" required />
-                                <button type="button" onClick={sendOtp}>Send OTP</button>
+                                <button type="button" onClick={sendOtp} disabled={isLoading}>
+                                    {isLoading ? "Sending..." : "Send OTP"}
+                                </button>
                             </>
                         )}
 
@@ -181,7 +210,9 @@ const LoginPopup = ({ setShowLogin }) => {
                             <>
                                 <input name="otp" onChange={onChangeHandler} value={data.otp}
                                     type="number" placeholder="Enter 6-digit OTP" required />
-                                <button type="button" onClick={verifyOtp}>Verify OTP</button>
+                                <button type="button" onClick={verifyOtp} disabled={isLoading}>
+                                    {isLoading ? "Verifying..." : "Verify OTP"}
+                                </button>
                             </>
                         )}
 
@@ -189,7 +220,9 @@ const LoginPopup = ({ setShowLogin }) => {
                             <>
                                 <input name="password" onChange={onChangeHandler} value={data.password}
                                     type="password" placeholder="Create Password (min 6 chars)" required />
-                                <button type="button" onClick={createPassword}>Create Account</button>
+                                <button type="button" onClick={createPassword} disabled={isLoading}>
+                                    {isLoading ? "Creating..." : "Create Account"}
+                                </button>
                             </>
                         )}
                     </>
@@ -201,7 +234,9 @@ const LoginPopup = ({ setShowLogin }) => {
                             type="email" placeholder="Email" required />
                         <input name="password" onChange={onChangeHandler} value={data.password}
                             type="password" placeholder="Password" required />
-                        <button type="submit">Login</button>
+                        <button type="submit" disabled={isLoading}>
+                            {isLoading ? "Logging in..." : "Login"}
+                        </button>
                     </>
                 )}
 

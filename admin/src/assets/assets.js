@@ -14,4 +14,4 @@ export const assets ={
     parcel_icon
 }
 
-export const url = 'https://del-exscel-backend8.onrender.com'
+export const url = 'http://localhost:4000'

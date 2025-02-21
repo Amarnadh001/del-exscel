@@ -1,5 +1,5 @@
 import cors from "cors";
-import 'dotenv/config';
+import dotenv from "dotenv";
 import express from "express";
 import { connectDB } from "./config/db.js";
 import cartRouter from "./routes/cartRoute.js";
@@ -8,6 +8,7 @@ import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 
+dotenv.config();
 // App configuration
 const app = express();
 const port = process.env.PORT || 4000;
@@ -15,8 +16,8 @@ const port = process.env.PORT || 4000;
 // Enhanced CORS configuration
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL || 'https://del-exscel-frontend.onrender.com',
-    process.env.ADMIN_URL || 'https://del-exscel-admin.onrender.com'
+    process.env.FRONTEND_URL || 'http://localhost:5174',
+    process.env.ADMIN_URL || 'http://localhost:5173'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
@@ -25,7 +26,11 @@ const corsOptions = {
 
 // Middleware
 app.use(express.json());
-app.use(cors(corsOptions)); // ✅ Secure CORS configuration
+app.use(cors({
+  origin: "*", // Allow all origins (for development)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+})); // ✅ Secure CORS configuration
 
 // Database connection
 connectDB();
@@ -37,6 +42,7 @@ app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/auth", authRoute); // ✅ Auth routes
+app.use(express.urlencoded({ extended: true }));
 
 // Remove this incorrect route
 // app.use("/api/verify", orderRouter); ❌
