@@ -13,8 +13,8 @@ const port = process.env.PORT || 4000;
 // Enhanced CORS configuration
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5174',
-    process.env.ADMIN_URL || 'http://localhost:5173'
+    process.env.FRONTEND_URL || 'https://del-exscel-frontend.onrender.com',
+    process.env.ADMIN_URL || 'https://del-exscel-admin.onrender.com'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Allow 'token' header
