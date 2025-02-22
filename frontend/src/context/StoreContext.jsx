@@ -14,12 +14,18 @@ const StoreContextProvider = (props) => {
         const newCart = { ...cartItems };
         newCart[itemId] = (newCart[itemId] || 0) + 1;
         setCartItems(newCart);
-        
+
         if (token) {
             try {
-                await axios.post(`${url}/api/cart/add`, { itemId }, { headers: { token } });
+                await axios.post(`${url}/api/cart/add`, { itemId }, {
+                    headers: { token }, // Include the token in the request headers
+                });
             } catch (error) {
                 console.error("Add to cart error:", error.response?.data);
+
+                if (error.response?.status === 401) {
+                    handleInvalidToken(); // Handle token expiration or invalid token
+                }
             }
         }
     };
@@ -29,7 +35,7 @@ const StoreContextProvider = (props) => {
         if (newCart[itemId] > 0) {
             newCart[itemId] -= 1;
             setCartItems(newCart);
-            
+
             if (token) {
                 try {
                     await axios.post(`${url}/api/cart/remove`, { itemId }, { headers: { token } });
@@ -58,16 +64,27 @@ const StoreContextProvider = (props) => {
         }
     };
 
-    const loadCartData = async (currentToken) => {
+    const loadCartData = async () => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            console.error("No token found. Redirecting to login...");
+            navigate("/login");
+            return;
+        }
+
         try {
-            const response = await axios.post(`${url}/api/cart/get`, {}, { 
-                headers: { token: currentToken } 
+            const response = await axios.post(`${url}/api/cart/get`, {}, {
+                headers: { token }, // Include the token in the request headers
             });
             setCartItems(response.data.cartData || {});
         } catch (error) {
-            console.error("Cart load error:", error.response?.data);
+            console.error("Cart load error:", error.response?.data || error.message);
+
             if (error.response?.status === 401) {
-                handleInvalidToken();
+                handleInvalidToken(); // Handle token expiration or invalid token
+            } else {
+                alert("Failed to load cart data. Please try again later.");
             }
         }
     };

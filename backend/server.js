@@ -1,5 +1,4 @@
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import { connectDB } from "./config/db.js";
 import cartRouter from "./routes/cartRoute.js";
@@ -8,8 +7,6 @@ import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 
-dotenv.config();
-// App configuration
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -20,17 +17,16 @@ const corsOptions = {
     process.env.ADMIN_URL || 'http://localhost:5173'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'token'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Allow 'token' header
+  credentials: true,
 };
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: "*", // Allow all origins (for development)
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-})); // ✅ Secure CORS configuration
+app.use(cors(corsOptions)); // Use the corsOptions here
+
+// Explicit preflight handling for /api/cart/add
+app.options("/api/cart/add", cors(corsOptions));
 
 // Database connection
 connectDB();
@@ -41,11 +37,7 @@ app.use("/images", express.static('uploads'));
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
-app.use("/api/auth", authRoute); // ✅ Auth routes
-app.use(express.urlencoded({ extended: true }));
-
-// Remove this incorrect route
-// app.use("/api/verify", orderRouter); ❌
+app.use("/api/auth", authRoute);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
