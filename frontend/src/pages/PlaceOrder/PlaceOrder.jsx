@@ -28,6 +28,64 @@ const PlaceOrder = () => {
     setData(data => ({ ...data, [name]: value }))
   }
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      script.onload = () => resolve(true)
+      script.onerror = () => resolve(false)
+      document.body.appendChild(script)
+    })
+  }
+
+  const handleRazorpayPayment = async (orderData) => {
+    const isLoaded = await loadRazorpay()
+    
+    if (!isLoaded) {
+      alert('Razorpay SDK failed to load')
+      return
+    }
+
+    const options = {
+      key: "rzp_live_kYGlb6Srm9dDRe", // Replace with your Razorpay key
+      amount: (getTotalCartAmount() + 8) * 100,
+      currency: "INR",
+      name: "FOOD FUSION",
+      description: "Food Order Payment",
+      handler: async (response) => {
+        try {
+          const verifyPayment = await axios.post(
+            url + "/api/order/verify-payment",
+            {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              orderData: orderData
+            },
+            { headers: { token } }
+          )
+          
+          if (verifyPayment.data.success) {
+            navigate("/myorders")
+          }
+        } catch (error) {
+          alert("Payment verification failed")
+        }
+      },
+      prefill: {
+        name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        contact: data.phone
+      },
+      theme: {
+        color: "#ff6b6b"
+      }
+    }
+
+    const paymentObject = new window.Razorpay(options)
+    paymentObject.open()
+  }
+
   const placeOrder = async (event) => {
     event.preventDefault();
     let orderItems = [];
@@ -44,20 +102,23 @@ const PlaceOrder = () => {
       amount: getTotalCartAmount() + 8,
     }
     if (paymentMethod === "cod") {
-      const response = await axios.post(url + "/api/order/place", orderData, { headers: { token } });
-      if (response.data.success) {
-        navigate("/myorders");
-      } else {
-        alert("Error");
+      try {
+        const response = await axios.post(
+          url + "/api/order/place", 
+          orderData, 
+          { headers: { token } }
+        )
+        if (response.data.success) {
+          navigate("/myorders")
+        } else {
+          alert("Error placing order")
+        }
+      } catch (error) {
+        alert("Error placing order")
       }
-    } else {
-      let response = await axios.post(url + "/api/order/place", orderData, { headers: { token } });
-      if (response.data.success) {
-        const { session_url } = response.data;
-        window.location.replace(session_url);
-      } else {
-        alert("Error");
-      }
+    } else if (paymentMethod === "card") {
+      // Handle Razorpay payment
+      await handleRazorpayPayment(orderData)
     }
   }
 
@@ -110,21 +171,35 @@ const PlaceOrder = () => {
               <b>₹{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 8}</b>
             </div>
           </div>
-          <button type='submit'>PROCEED TO PAYMENT</button>
-<div className="payment-options">
-  <label className="payment-option">
-    <input type="radio" name="paymentMethod" value="cod" onChange={(e) => setPaymentMethod(e.target.value)} />
-    <span>Cash on Delivery</span>
-  </label>
-  <label className="payment-option">
-    <input type="radio" name="paymentMethod" value="card" onChange={(e) => setPaymentMethod(e.target.value)} defaultChecked />
-    <span>Card</span>
-  </label>
-</div>
-</div>
-</div>
-</form>
-)
+          <button type='submit'>
+            {paymentMethod === 'cod' ? 'PLACE ORDER' : 'PROCEED TO PAYMENT'}
+          </button>
+          <div className="payment-options">
+            <label className="payment-option">
+              <input 
+                type="radio" 
+                name="paymentMethod" 
+                value="cod" 
+                checked={paymentMethod === "cod"}
+                onChange={(e) => setPaymentMethod(e.target.value)} 
+              />
+              <span>Cash on Delivery</span>
+            </label>
+            <label className="payment-option">
+              <input 
+                type="radio" 
+                name="paymentMethod" 
+                value="card" 
+                checked={paymentMethod === "card"}
+                onChange={(e) => setPaymentMethod(e.target.value)} 
+              />
+              <span>Online Payment</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </form>
+  )
 }
 
 export default PlaceOrder
