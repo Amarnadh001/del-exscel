@@ -6,26 +6,19 @@ import foodRouter from "./routes/foodRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
-import path from "path";
-import { fileURLToPath } from "url";
-
-// Resolve __dirname for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 4000;
 
+
 // Enhanced CORS configuration
 const corsOptions = {
   origin: [
-
     process.env.FRONTEND_URL || 'https://del-exscel-frontend.onrender.com',
     process.env.ADMIN_URL || 'https://del-exscel-admin.onrender.com'
   ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization", "token"], // Allow 'token' header
-
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'token'], // Allow 'token' header
   credentials: true,
 };
 
@@ -33,10 +26,10 @@ const corsOptions = {
 app.use(express.json());
 app.use(cors(corsOptions)); // Use the corsOptions here
 
-
 // Explicit preflight handling for /api/cart/add
 app.options("/api/cart/add", cors(corsOptions));
 
+>>>>>>> 331a8a534b3d9290b4a3f261be6994821e59f234
 // Database connection
 connectDB();
 
@@ -66,6 +59,13 @@ app.get("/", (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`✅ Server running in ${process.env.NODE_ENV || "development"} mode`);
+// Health check
+app.get("/", (req, res) => {
+  res.json({ status: "active", message: "Food Ordering API Service" });
+});
+
+app.listen(port, () => {
+  console.log(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode`);
   console.log(`🔗 Access endpoints at http://localhost:${port}`);
 });
 // mongodb+srv://amarnadh:369082@cluster0.wbhb7.mongodb.net/?
