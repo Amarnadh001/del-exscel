@@ -1,40 +1,71 @@
-import cors from "cors"
-import 'dotenv/config'
-import express from "express"
-import { connectDB } from "./config/db.js"
-import cartRouter from "./routes/cartRoute.js"
-import foodRouter from "./routes/foodRoute.js"
-import orderRouter from "./routes/orderRoute.js"
-import userRouter from "./routes/userRoute.js"
+import cors from "cors";
+import express from "express";
+import { connectDB } from "./config/db.js";
+import cartRouter from "./routes/cartRoute.js";
+import foodRouter from "./routes/foodRoute.js";
+import orderRouter from "./routes/orderRoute.js";
+import userRouter from "./routes/userRoute.js";
+import authRoute from "./routes/authRoute.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Resolve __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const port = process.env.PORT || 4000;
+
+// Enhanced CORS configuration
+const corsOptions = {
+  origin: [
+
+    process.env.FRONTEND_URL || 'https://del-exscel-frontend.onrender.com',
+    process.env.ADMIN_URL || 'https://del-exscel-admin.onrender.com'
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "token"], // Allow 'token' header
+
+  credentials: true,
+};
+
+// Middleware
+app.use(express.json());
+app.use(cors(corsOptions)); // Use the corsOptions here
 
 
+// Explicit preflight handling for /api/cart/add
+app.options("/api/cart/add", cors(corsOptions));
 
-// app config
-const app = express()
-const port =  process.env.PORT || 4000
-
-// middleware
-app.use(express.json())
-app.use(cors())
-
-// db connection
+// Database connection
 connectDB();
 
-// api endpoints
-app.use("/api/food",foodRouter)
-app.use("/images",express.static('uploads'))
-app.use("/api/user",userRouter)
-app.use("/api/cart",cartRouter)
-app.use("/api/order",orderRouter)
-app.use("/api/verify",orderRouter)
+// API endpoints
+app.use("/api/food", foodRouter);
+app.use("/api/user", userRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
+app.use("/api/auth", authRoute);
 
 
-app.get("/",(req,res)=>{
-    res.send("API Working")
-})
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("🚨 Server Error:", err.stack);
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+  });
+});
 
-app.listen(port,()=>{
-    console.log(`Server Started on http://localhost:${port}`)
-})
+// Health check
+app.get("/", (req, res) => {
+  res.json({ status: "active", message: "Food Ordering API Service" });
+});
 
+// Start the server
+app.listen(port, () => {
+  console.log(`✅ Server running in ${process.env.NODE_ENV || "development"} mode`);
+  console.log(`🔗 Access endpoints at http://localhost:${port}`);
+});
 // mongodb+srv://amarnadh:369082@cluster0.wbhb7.mongodb.net/?

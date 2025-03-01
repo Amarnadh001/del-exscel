@@ -30,3 +30,4 @@ backend/node_modules
 .frontend/.env
 .backend/.env
 node_modules/
+backend/config/firebaseServiceAccount.json
